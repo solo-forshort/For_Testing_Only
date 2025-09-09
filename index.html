@@ -1,196 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Mobile Money Security Q&A</title>
   <style>
-    :root{
+    :root {
       --bg: #f5f7fa;
-      --card: #ffffff;
+      --card: #fff;
       --text: #111827;
       --muted: #6b7280;
       --border: #e5e7eb;
       --accent: #2563eb;
+      --green: #16a34a;
+      --green-dark: #15803d;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 24px;
-      background: var(--bg);
-      font-family: sans-serif;
-      color: var(--text);
-    }
-    header {
-      max-width: 900px;
-      margin: 0 auto 12px;
-      text-align: center;
-    }
-    h1 {
-      margin: 0;
-      font-size: 28px;
-    }
-    p.sub {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-    .controls {
-      max-width: 900px;
-      margin: 16px auto 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-    }
-    .controls input,
-    .controls select {
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: #fff;
-      font-size: 14px;
-    }
-    .controls button {
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: none;
-      background: var(--accent);
-      color: #fff;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .controls button:hover {
-      filter: brightness(0.95);
-    }
-    #cards {
-      max-width: 900px;
-      margin: 0 auto;
-      display: grid;
-      gap: 14px;
-      grid-template-columns: 1fr;
-    }
-    @media(min-width:720px) { #cards { grid-template-columns: 1fr 1fr; } }
-    @media(min-width:1100px) { #cards { grid-template-columns: 1fr 1fr 1fr; } }
-    .card {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 14px;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-height: 140px;
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0,0,0,0.08);
-    }
-    .badges {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .badge {
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--muted);
-    }
-    .priority.High { background: #ef4444; color: #fff; border-color: #ef4444; }
-    .priority.Medium { background: #f59e0b; color: #111; border-color: #f59e0b; }
-    .priority.Low { background: #22c55e; color: #fff; border-color: #22c55e; }
-    .tag-badge {
-      background: #eef4ff;
-      color: #1e3a8a;
-      border-color: #dbe6ff;
-      font-weight: 600;
-    }
-    .q {
-      font-size: 16px;
-      font-weight: 700;
-      margin: 0;
-      color: var(--text);
-    }
-    .row {
-      font-size: 14px;
-      color: #374151;
-    }
-    .notes {
-      font-size: 13px;
-      color: #374151;
-      background: #f3f4f6;
-      border: 1px dashed var(--border);
-      padding: 8px;
-      border-radius: 8px;
-    }
-    .smalllink {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .empty {
-      max-width: 900px;
-      margin: 40px auto;
-      text-align: center;
-      color: var(--muted);
-    }
-    .loading {
-      max-width: 900px;
-      margin: 30px auto;
-      text-align: center;
-      color: var(--muted);
-      font-style: italic;
-    }
-    footer {
-      max-width: 900px;
-      margin: 18px auto 0;
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
-    }
+    *{box-sizing:border-box;}
+    body{margin:0;padding:24px;background:var(--bg);font-family:sans-serif;color:var(--text);}
+    header{max-width:900px;margin:0 auto 16px;text-align:center;}
+    h1{margin:0;font-size:28px;}
+    p.sub{margin:6px 0 0;color:var(--muted);font-size:14px;}
+    .ask-btn{display:inline-block;margin-top:14px;padding:10px 16px;border-radius:10px;background:var(--green);color:#fff;font-size:14px;font-weight:600;text-decoration:none;transition:background .2s,transform .2s;}
+    .ask-btn:hover{background:var(--green-dark);transform:translateY(-2px);}
+    .controls{max-width:900px;margin:16px auto 20px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+    .controls input, .controls select{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:14px;}
+    #cards{max-width:900px;margin:0 auto;display:grid;gap:14px;grid-template-columns:1fr;}
+    @media(min-width:720px){#cards{grid-template-columns:1fr 1fr;}}
+    @media(min-width:1100px){#cards{grid-template-columns:1fr 1fr 1fr;}}
+    .card{background:var(--card);border-radius:12px;padding:14px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;gap:8px;min-height:160px;}
+    .card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,0.08);}
+    .badges{display:flex;gap:6px;flex-wrap:wrap;}
+    .badge{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--muted);}
+    .priority.High{background:#ef4444;color:#fff;border-color:#ef4444;}
+    .priority.Medium{background:#f59e0b;color:#111;border-color:#f59e0b;}
+    .priority.Low{background:#22c55e;color:#fff;border-color:#22c55e;}
+    .tag-badge{background:#eef4ff;color:#1e3a8a;border-color:#dbe6ff;font-weight:600;}
+    .q{font-size:16px;font-weight:700;margin:0;color:var(--text);}
+    .row{font-size:14px;color:#374151;}
+    .notes{font-size:13px;color:#374151;background:#f3f4f6;border:1px dashed var(--border);padding:8px;border-radius:8px;}
+    .suggest-btn{margin-top:8px;padding:6px 12px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;cursor:pointer;transition:background .2s;}
+    .suggest-btn:hover{background:darken(var(--accent),10%);}
+    .empty{max-width:900px;margin:40px auto;text-align:center;color:var(--muted);}
+    .loading{max-width:900px;margin:30px auto;text-align:center;color:var(--muted);font-style:italic;}
   </style>
 </head>
 <body>
 
-<header>
-  <h1>Mobile Money Security Q&A</h1>
-  <p class="sub">Live vendor questions & tips — automatically synced from your Google Sheet.</p>
-</header>
+  <header>
+    <h1>Mobile Money Security Q&A</h1>
+    <p class="sub">Live vendor questions & tips — synced from Google Sheets</p>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSc4S6LV8NWwomzoGudHhDoAdwbQUblw3jOjVmvk4l6275Voeg/viewform" target="_blank" class="ask-btn">Ask a Question</a>
+  </header>
 
-<div class="controls">
-  <input id="search" type="search" placeholder="Search by keyword… (e.g., fake transaction, PIN)">
-  <select id="priorityFilter">
-    <option value="">All Priorities</option>
-    <option value="High">High</option>
-    <option value="Medium">Medium</option>
-    <option value="Low">Low</option>
-  </select>
-  <button id="askBtn">Ask a Question</button>
-</div>
+  <div class="controls">
+    <input id="search" type="search" placeholder="Search keyword…">
+    <select id="priorityFilter">
+      <option value="">All Priorities</option>
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low">Low</option>
+    </select>
+  </div>
 
-<div id="cards"></div>
-<div id="empty" class="empty" style="display:none;">No items match your search or filters.</div>
-<div id="loading" class="loading">Loading data…</div>
-
-<footer>New responses appear automatically after submission.</footer>
+  <div id="cards"></div>
+  <div id="empty" class="empty" style="display:none;">No items match your search.</div>
+  <div id="loading" class="loading">Loading data…</div>
 
 <script>
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToqPBwRgOnC8tq-xQ18vrCTtAL5v0TG2z7HoXdGiXTtLoilWkpfoq3DFWr93oPSXlsW2f_kmJ2Vse4/pub?output=csv";
-  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc4S6LV8NWwomzoGudHhDoAdwbQUblw3jOjVmvk4l6275Voeg/viewform?usp=sharing";
+  const FORM_PRE = "https://docs.google.com/forms/d/e/1FAIpQLSc4S6LV8NWwomzoGudHhDoAdwbQUblw3jOjVmvk4l6275Voeg/viewform?usp=pp_url&entry.1219669983=";
   const state = { all: [], filtered: [] };
-
-  document.getElementById("askBtn").addEventListener("click", () => window.open(FORM_URL, "_blank", "noopener"));
 
   function parseCSV(text){
     text = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
-    const lines = text.split("\n").filter(l => l.trim() !== "");
+    const lines = text.split("\n").filter(l => l.trim());
     if (!lines.length) return [];
-    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,"").trim());
-    return lines.slice(1).map(line => {
+    const headers = lines.shift().split(',').map(h => h.replace(/^"|"$/g,"").trim());
+    return lines.map(line => {
       const cells = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
       const obj = {};
       headers.forEach((h,i) => obj[h] = (cells[i]||"").replace(/^"|"$/g,"").trim());
@@ -198,29 +84,33 @@
     });
   }
 
-  function escapeHtml(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  function escape(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
   function render(){
     const cards = document.getElementById("cards");
     const empty = document.getElementById("empty");
     cards.innerHTML = "";
 
     if (!state.filtered.length){
-      empty.style.display = "block";
-      return;
+      empty.style.display = "block"; return;
     }
     empty.style.display = "none";
 
     state.filtered.forEach(it => {
       const card = document.createElement("article");
       card.className = "card";
+      const qText = escape(it["Question 1"]);
+      const formLink = FORM_PRE + encodeURIComponent(it["Question 1"]);
       card.innerHTML = `
         <div class="badges">
-          ${it.Priority ? `<span class="badge priority ${escapeHtml(it.Priority)}">${escapeHtml(it.Priority)}</span>` : ""}
-          ${it.Tag ? `<span class="badge tag-badge">${escapeHtml(it.Tag)}</span>` : ""}
+          ${it["Priority(H/M/L)"] ? `<span class="badge priority ${escape(it["Priority(H/M/L)"])}">${escape(it["Priority(H/M/L)"])}</span>` : ""}
+          ${it["Tag(e.g., SIM swap, phishing, PIN safety)."] ? `<span class="badge tag-badge">${escape(it["Tag(e.g., SIM swap, phishing, PIN safety)."])}</span>` : ""}
         </div>
-        <div class="q">${escapeHtml(it.Question)}</div>
-        ${it["Possible Solution"] ? `<div class="notes"><strong>Solution:</strong> ${escapeHtml(it["Possible Solution"])}</div>` : ""}
-        ${it["Notes → any extra remarks"] ? `<div class="notes"><strong>Notes:</strong> ${escapeHtml(it["Notes → any extra remarks"])}</div>` : ""}
+        <div class="q">${qText}</div>
+        ${it["Question 2"] ? `<div class="row"><strong>Q2:</strong> ${escape(it["Question 2"])}</div>` : ""}
+        ${it["Question 3"] ? `<div class="row"><strong>Q3:</strong> ${escape(it["Question 3"])}</div>` : ""}
+        ${it["Possible Solution"] ? `<div class="notes"><strong>Solution:</strong> ${escape(it["Possible Solution"])}</div>` : ""}
+        <a href="${formLink}" target="_blank"><button class="suggest-btn">Suggest Solution</button></a>
       `;
       cards.appendChild(card);
     });
@@ -230,8 +120,8 @@
     const q = document.getElementById("search").value.toLowerCase();
     const p = document.getElementById("priorityFilter").value;
     state.filtered = state.all.filter(it => {
-      const hay = [it.Question, it["Possible Solution"], it["Notes → any extra remarks"], it.Tag].join(" ").toLowerCase();
-      return (!q || hay.includes(q)) && (!p || it.Priority === p);
+      const hay = [it["Question 1"], it["Question 2"], it["Question 3"], it["Possible Solution"], it["Tag(e.g., SIM swap, phishing, PIN safety)."]].join(" ").toLowerCase();
+      return (!q || hay.includes(q)) && (!p || it["Priority(H/M/L)"] === p);
     });
     render();
   }
@@ -239,22 +129,23 @@
   document.getElementById("search").addEventListener("input", applyFilters);
   document.getElementById("priorityFilter").addEventListener("change", applyFilters);
 
-  (async() => {
+  (async () => {
     try {
       const res = await fetch(CSV_URL);
       const csv = await res.text();
       const rows = parseCSV(csv);
-      state.all = rows.filter(r => r.Question && r.Question.trim() !== "");
+      state.all = rows.filter(r => r["Question 1"] && r["Question 1"].trim());
       state.filtered = [...state.all];
       render();
-    } catch(e){
-      console.error("Error:", e);
-      document.getElementById("empty").textContent = "Failed to load sheet data.";
+    } catch (e) {
+      console.error(e);
+      document.getElementById("empty").textContent = "Could not load sheet data.";
       document.getElementById("empty").style.display = "block";
     } finally {
       document.getElementById("loading").style.display = "none";
     }
   })();
 </script>
+
 </body>
 </html>
