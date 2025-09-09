@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mobile Money Security Q&A</title>
+<style>
+  :root{
+    --bg:#f5f7fa;
+    --card:#ffffff;
+    --text:#111827;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+    --accent:#2563eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:24px; background:var(--bg);
+    font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans";
+    color:var(--text);
+  }
+  header{max-width:1000px;margin:0 auto 10px auto;text-align:center}
+  h1{margin:0 0 6px 0;font-size:28px}
+  p.sub{margin:0;color:var(--muted);font-size:14px}
+
+  .controls{
+    max-width:1000px;margin:16px auto 20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center
+  }
+  .controls input,.controls select{
+    padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:#fff
+  }
+  .controls .cta{
+    padding:10px 14px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer
+  }
+  .controls .cta:hover{filter:brightness(.95)}
+
+  #cards{
+    max-width:1000px;margin:0 auto;display:grid;gap:14px;grid-template-columns:1fr
+  }
+  @media(min-width:720px){ #cards{ grid-template-columns:1fr 1fr } }
+  @media(min-width:1100px){ #cards{ grid-template-columns:1fr 1fr 1fr } }
+
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+    transition:transform .18s ease, box-shadow .18s ease;
+    display:flex;flex-direction:column;gap:8px;min-height:140px
+  }
+  .card:hover{ transform:translateY(-3px); box-shadow:0 10px 24px rgba(0,0,0,.08) }
+
+  .badges{display:flex;gap:6px;flex-wrap:wrap}
+  .badge{display:inline-block;font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--muted)}
+  .priority.High{background:#ef4444;color:#fff;border-color:#ef4444}
+  .priority.Medium{background:#f59e0b;color:#111;border-color:#f59e0b}
+  .priority.Low{background:#22c55e;color:#fff;border-color:#22c55e}
+  .tag-badge{background:#eef4ff;color:#1e40af;border-color:#dbe6ff;font-weight:500}
+
+  .q{font-size:16px;font-weight:700;margin:2px 0 0 0}
+  .row{font-size:14px;color:#374151}
+  .row strong{color:#111}
+  .notes{font-size:13px;color:#374151;background:#f3f4f6;border:1px dashed #e5e7eb;border-radius:10px;padding:8px}
+  .empty{max-width:1000px;margin:40px auto;text-align:center;color:var(--muted)}
+  footer{max-width:1000px;margin:22px auto 0 auto;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+  <header>
+    <h1>Mobile Money Security Q&A</h1>
+    <p class="sub">Live questions and tips from vendors in Ghana — pulled directly from our Google Sheet.</p>
+  </header>
+
+  <div class="controls">
+    <input id="search" type="search" placeholder="Search (e.g., fake transaction, PIN, SIM swap)…"/>
+    <select id="priority">
+      <option value="">All priorities</option>
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low">Low</option>
+    </select>
+    <button class="cta" id="askBtn">Ask a Question</button>
+  </div>
+
+  <section id="cards"></section>
+  <div id="empty" class="empty" style="display:none">No items match your search/filters.</div>
+
+  <footer>New submissions appear here after they’re saved in the sheet.</footer>
+
+  <script>
+    // === CONFIG ===
+    const SHEET_URL = "https://opensheet.elk.sh/12bqzmih2nvVQnSYAMggXG3FBrbZyXhC5IaAEhqydkb0/responseform";
+    const FORM_URL  = "https://docs.google.com/forms/d/e/1FAIpQLSc4S6LV8NWwomzoGudHhDoAdwbQUblw3jOjVmvk4l6275Voeg/viewform?usp=sharing";
+
+    // Open form in new tab
+    document.getElementById("askBtn").addEventListener("click", () => window.open(FORM_URL, "_blank", "noopener"));
+
+    // State
+    const state = { all: [], filtered: [] };
+
+    // Detect column keys robustly (handles line breaks/spaces Google adds)
+    function detectKeys(sampleRow){
+      const keys = Object.keys(sampleRow || {});
+      const find = (snippets) =>
+        keys.find(k => snippets.every(s => k.toLowerCase().includes(s))) || null;
+
+      return {
+        question: find(["question 1"]),
+        category: find(["question 2"]),
+        scenario: find(["question 3","scenario"]) || find(["question 3","example"]),
+        priority: find(["priority"]),
+        tag:      find(["tag"]),
+        notes:    find(["notes"]),
+        solution: find(["possible solution"]),
+        video:    find(["video link"])
+      };
+    }
+
+    // Escape HTML
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#39;");
+    }
+
+    // Render cards
+    function render(){
+      const grid = document.getElementById("cards");
+      const empty = document.getElementById("empty");
+      grid.innerHTML = "";
+
+      if(state.filtered.length === 0){
+        empty.style.display = "block";
+        return;
+      }
+      empty.style.display = "none";
+
+      state.filtered.forEach(it => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="badges">
+            ${it.priority ? `<span class="badge priority ${escapeHtml(it.priority)}">${escapeHtml(it.priority)}</span>` : ""}
+            ${it.tag ? `<span class="badge tag-badge">${escapeHtml(it.tag)}</span>` : ""}
+          </div>
+
+          <h3 class="q">${escapeHtml(it.question)}</h3>
+
+          ${it.scenario ? `<div class="row"><strong>Scenario: </strong><span>${escapeHtml(it.scenario)}</span></div>` : ""}
+          ${it.notes ? `<div class="notes"><strong>Notes:</strong> ${escapeHtml(it.notes)}</div>` : ""}
+          ${it.solution ? `<div class="notes"><strong>Possible Solution:</strong> ${escapeHtml(it.solution)}</div>` : ""}
+          ${it.video ? `<div class="row"><strong>Video: </strong><a href="${it.video}" target="_blank" rel="noopener">${escapeHtml(it.video)}</a></div>` : ""}
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Apply search & priority filter
+    function applyFilters(){
+      const q = document.getElementById("search").value.toLowerCase();
+      const p = document.getElementById("priority").value;
+      state.filtered = state.all.filter(it => {
+        const hay = [it.question, it.scenario, it.notes, it.solution, it.tag].join(" ").toLowerCase();
+        const matchText = hay.includes(q);
+        const matchPrio = !p || it.priority === p;
+        return matchText && matchPrio;
+      });
+      render();
+    }
+    document.getElementById("search").addEventListener("input", applyFilters);
+    document.getElementById("priority").addEventListener("change", applyFilters);
+
+    // Fetch data and build items
+    fetch(SHEET_URL)
+      .then(r => r.json())
+      .then(rows => {
+        if(!rows || !rows.length){ throw new Error("No rows"); }
+
+        const K = detectKeys(rows[0]); // detect header keys dynamically
+
+        state.all = rows.map(r => ({
+          question: (K.question && r[K.question] || "").trim(),
+          priority: (K.priority && r[K.priority] || "").trim(),
+          tag:      (K.tag && r[K.tag] || "").trim(),
+          scenario: (K.scenario && r[K.scenario] || "").trim(),
+          notes:    (K.notes && r[K.notes] || "").trim(),
+          solution: (K.solution && r[K.solution] || "").trim(),
+          video:    (K.video && r[K.video] || "").trim()
+        })).filter(x => x.question.length > 0);
+
+        state.filtered = state.all.slice();
+        render();
+      })
+      .catch(err => {
+        console.error("Failed to load data:", err);
+        const empty = document.getElementById("empty");
+        empty.style.display = "block";
+        empty.textContent = "Could not load data from the sheet.";
+      });
+  </script>
+</body>
+</html>
