@@ -32,7 +32,7 @@
     .row{font-size:14px;color:#374151}
     .notes{font-size:13px;color:#374151;background:#fbfcfd;border:1px dashed var(--border);padding:8px;border-radius:8px}
     .suggest-area{margin-top:8px}
-    .suggest-area textarea{width:100%;height:64px;padding:8px;border-radius:6px;border:1px solid #ccc;resize:vertical;font-size:14px}
+    .suggest-area textarea{width:100%;height:40px;padding:6px;border-radius:6px;border:1px solid #ccc;resize:vertical;font-size:14px}
     .suggest-area button{margin-top:6px;padding:8px 12px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
     .empty{max-width:1000px;margin:40px auto;text-align:center;color:var(--muted)}
     .loading{max-width:1000px;margin:30px auto;text-align:center;color:var(--muted);font-style:italic}
@@ -65,8 +65,8 @@
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToqPBwRgOnC8tq-xQ18vrCTtAL5v0TG2z7HoXdGiXTtLoilWkpfoq3DFWr93oPSXlsW2f_kmJ2Vse4/pub?output=csv";
 /* the form base (no prefilled values) */
 const FORM_BASE = "https://docs.google.com/forms/d/e/1FAIpQLSc4S6LV8NWwomzoGudHhDoAdwbQUblw3jOjVmvk4l6275Voeg/viewform?usp=pp_url&";
-/* entry parameter names you gave */
-const Q_ENTRY = "entry.1219669983=";
+/* entry parameter names from your prefill test */
+const Q_ENTRY   = "entry.1171875158=";
 const SOL_ENTRY = "entry.1293335924=";
 
 /* state */
@@ -78,7 +78,6 @@ function parseCSV(text){
   text = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
   const lines = text.split("\n").filter(l => l.trim() !== "");
   if(!lines.length) return [];
-  // header row
   const headerCells = lines.shift().match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
   const headers = headerCells.map(h => h.replace(/^"|"$/g,"").trim());
   const rows = lines.map(line => {
@@ -110,11 +109,11 @@ function render(){
     const card = document.createElement("article");
     card.className = "card";
 
-    // Combine the questions for prefill (we'll pass them in the single Question entry)
-    const combinedQuestions = [row["Question 1"], row["Question 2"], row["Question 3"]].filter(Boolean).join(" | ");
+    // Combine only non-empty questions
+    const questions = [row["Question 1"], row["Question 2"], row["Question 3"]].filter(Boolean);
+    const combinedQuestions = questions.join(" | ");
 
-    // Build a base prefill URL (question param + solution param will be appended later)
-    // We'll insert the typed user solution when they click Submit
+    // Build prefill URL
     const basePrefill = FORM_BASE + Q_ENTRY + encodeURIComponent(combinedQuestions) + "&" + SOL_ENTRY;
 
     card.innerHTML = `
@@ -152,7 +151,6 @@ function submitSolution(btn, basePrefillUrl){
       textarea.focus();
       return;
     }
-    // build final URL
     const finalUrl = basePrefillUrl + encodeURIComponent(userText);
     window.open(finalUrl, "_blank", "noopener");
   }catch(e){
@@ -187,8 +185,7 @@ document.getElementById("priorityFilter").addEventListener("change", applyFilter
     if(!res.ok) throw new Error("Failed to fetch CSV: " + res.status);
     const text = await res.text();
     const rows = parseCSV(text);
-    // Keep only rows with a Question 1
-    allRows = rows.filter(r => r["Question 1"] && r["Question 1"].trim());
+    allRows = rows.filter(r => (r["Question 1"] && r["Question 1"].trim()) || (r["Question 2"] && r["Question 2"].trim()) || (r["Question 3"] && r["Question 3"].trim()));
     filtered = allRows.slice();
     render();
     console.info("Loaded rows:", allRows.length);
