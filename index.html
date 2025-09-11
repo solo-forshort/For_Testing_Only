@@ -1,203 +1,106 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Mobile Money Security Q&A</title>
+  <meta charset="UTF-8">
+  <title>Cybersecurity Awareness Questions</title>
   <style>
-    :root{
-      --bg:#f5f7fa; --card:#fff; --text:#111827; --muted:#6b7280; --border:#e5e7eb; --accent:#2563eb; --green:#16a34a; --green-dark:#15803d;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;padding:22px;background:var(--bg);font-family:Inter,system-ui,Arial;color:var(--text)}
-    header{max-width:1000px;margin:0 auto 12px;text-align:center}
-    h1{margin:0;font-size:26px}
-    p.sub{margin:6px 0 0;color:var(--muted)}
-    .ask-btn{display:inline-block;margin-top:12px;padding:10px 16px;border-radius:10px;background:var(--green);color:#fff;text-decoration:none;font-weight:600}
-    .ask-btn:hover{background:var(--green-dark)}
-    .controls{max-width:1000px;margin:16px auto 18px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-    .controls input,.controls select{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;min-width:220px}
-    #cards{max-width:1000px;margin:0 auto;display:grid;gap:14px;grid-template-columns:1fr}
-    @media(min-width:720px){#cards{grid-template-columns:1fr 1fr}}
-    @media(min-width:1100px){#cards{grid-template-columns:1fr 1fr 1fr}}
-    .card{background:var(--card);border-radius:12px;padding:14px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:transform .18s,box-shadow .18s;display:flex;flex-direction:column;gap:8px;min-height:150px}
-    .card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,0.08)}
-    .badges{display:flex;gap:8px;flex-wrap:wrap}
-    .badge{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--muted)}
-    .priority.High{background:#ef4444;color:#fff;border-color:#ef4444}
-    .priority.Medium{background:#f59e0b;color:#111;border-color:#f59e0b}
-    .priority.Low{background:#22c55e;color:#fff;border-color:#22c55e}
-    .tag-badge{background:#eef4ff;color:#1e3a8a;border-color:#dbe6ff;font-weight:600}
-    .q{font-size:15px;font-weight:700;margin:0}
-    .row{font-size:14px;color:#374151}
-    .notes{font-size:13px;color:#374151;background:#fbfcfd;border:1px dashed var(--border);padding:8px;border-radius:8px}
-    .suggest-area{margin-top:8px}
-    .suggest-area textarea{width:100%;height:40px;padding:6px;border-radius:6px;border:1px solid #ccc;resize:vertical;font-size:14px}
-    .suggest-area button{margin-top:6px;padding:8px 12px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
-    .empty{max-width:1000px;margin:40px auto;text-align:center;color:var(--muted)}
-    .loading{max-width:1000px;margin:30px auto;text-align:center;color:var(--muted);font-style:italic}
+    body { font-family: Arial, sans-serif; background:#f4f4f9; margin:20px; }
+    .card { background:#fff; border-radius:12px; padding:16px; margin:16px auto;
+            max-width:600px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    .badges { margin-bottom:8px; }
+    .badge { display:inline-block; padding:4px 8px; border-radius:8px;
+             font-size:12px; margin-right:6px; color:#fff; }
+    .high { background:#e74c3c; }
+    .medium { background:#f39c12; }
+    .low { background:#27ae60; }
+    .tag { background:#2980b9; }
+    .solution { margin:8px 0; padding:8px; background:#ecf0f1; border-radius:6px; }
+    textarea { width:100%; min-height:60px; margin-top:6px; padding:8px; }
+    button { margin-top:6px; padding:8px 12px; border:none; border-radius:6px;
+             background:#3498db; color:#fff; cursor:pointer; }
+    button:hover { background:#2980b9; }
   </style>
 </head>
 <body>
-
-  <header>
-    <h1>Mobile Money Security Q&A</h1>
-    <p class="sub">Live vendor questions & suggested solutions (from Google Sheets)</p>
-    <a class="ask-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSc4S6LV8NWwomzoGudHhDoAdwbQUblw3jOjVmvk4l6275Voeg/viewform" target="_blank">Ask a Question</a>
-  </header>
-
-  <div class="controls">
-    <input id="search" type="search" placeholder="Search (fake transaction, PIN, SIM swap…)">
-    <select id="priorityFilter">
-      <option value="">All Priorities</option>
-      <option value="High">High</option>
-      <option value="Medium">Medium</option>
-      <option value="Low">Low</option>
-    </select>
-  </div>
-
+  <h2>Cybersecurity Awareness Questions</h2>
   <div id="cards"></div>
-  <div id="empty" class="empty" style="display:none">No matching cards</div>
-  <div id="loading" class="loading">Loading…</div>
 
-<script>
-/* ========== CONFIG ========== */
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToqPBwRgOnC8tq-xQ18vrCTtAL5v0TG2z7HoXdGiXTtLoilWkpfoq3DFWr93oPSXlsW2f_kmJ2Vse4/pub?output=csv";
-/* the form base (no prefilled values) */
-const FORM_BASE = "https://docs.google.com/forms/d/e/1FAIpQLSc4S6LV8NWwomzoGudHhDoAdwbQUblw3jOjVmvk4l6275Voeg/viewform?usp=pp_url&";
-/* entry parameter names from your prefill test */
-const Q_ENTRY   = "entry.1171875158=";
-const SOL_ENTRY = "entry.1293335924=";
+  <script>
+    // === CONFIG ===
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToqPBwRgOnC8tq-xQ18vrCTtAL5v0TG2z7HoXdGiXTtLoilWkpfoq3DFWr93oPSXlsW2f_kmJ2Vse4/pub?output=csv";
+    const FORM_BASE = "https://docs.google.com/forms/d/e/1FAIpQLSc4S6LV8NWwomzoGudHhDoAdwbQUblw3jOjVmvk4l6275Voeg/viewform?usp=pp_url&";
+    const Q_ENTRY   = "entry.1171875158=";  // Question entry id
+    const SOL_ENTRY = "entry.1293335924=";  // Solution entry id
 
-/* state */
-let allRows = [];
-let filtered = [];
-
-/* simple CSV parser that handles quoted fields with commas */
-function parseCSV(text){
-  text = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
-  const lines = text.split("\n").filter(l => l.trim() !== "");
-  if(!lines.length) return [];
-  const headerCells = lines.shift().match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
-  const headers = headerCells.map(h => h.replace(/^"|"$/g,"").trim());
-  const rows = lines.map(line => {
-    const cells = line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
-    const obj = {};
-    headers.forEach((h, i) => {
-      obj[h] = (cells[i] || "").replace(/^"|"$/g, "").trim();
-    });
-    return obj;
-  });
-  return rows;
-}
-
-function escapeHtml(s){ return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-
-/* Build and render cards: one card per row */
-function render(){
-  const cards = document.getElementById("cards");
-  const empty = document.getElementById("empty");
-  cards.innerHTML = "";
-
-  if(!filtered.length){
-    empty.style.display = "block";
-    return;
-  }
-  empty.style.display = "none";
-
-  filtered.forEach(row => {
-    const card = document.createElement("article");
-    card.className = "card";
-
-    // Combine only non-empty questions
-    const questions = [row["Question 1"], row["Question 2"], row["Question 3"]].filter(Boolean);
-    const combinedQuestions = questions.join(" | ");
-
-    // Build prefill URL
-    const basePrefill = FORM_BASE + Q_ENTRY + encodeURIComponent(combinedQuestions) + "&" + SOL_ENTRY;
-
-    card.innerHTML = `
-      <div class="badges">
-        ${row["Priority(H/M/L)"] ? `<span class="badge priority ${escapeHtml(row["Priority(H/M/L)"])}">${escapeHtml(row["Priority(H/M/L)"])}</span>` : ""}
-        ${row["Tag(e.g., SIM swap, phishing, PIN safety)."] ? `<span class="badge tag-badge">${escapeHtml(row["Tag(e.g., SIM swap, phishing, PIN safety)."])}</span>` : ""}
-      </div>
-
-      ${row["Question 1"] ? `<div class="q"><strong>Q1:</strong> ${escapeHtml(row["Question 1"])}</div>` : ""}
-      ${row["Question 2"] ? `<div class="row"><strong>Q2:</strong> ${escapeHtml(row["Question 2"])}</div>` : ""}
-      ${row["Question 3"] ? `<div class="row"><strong>Q3:</strong> ${escapeHtml(row["Question 3"])}</div>` : ""}
-
-      ${row["Possible Solution"] ? `<div class="notes"><strong>Solution:</strong> ${escapeHtml(row["Possible Solution"])}</div>` : ""}
-
-      <div class="suggest-area">
-        <textarea placeholder="Type your suggested solution..."></textarea>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="suggest-btn" onclick="submitSolution(this, '${basePrefill}')">Submit Solution</button>
-          <a style="align-self:center;color:var(--muted);font-size:13px;text-decoration:none" href="${encodeURI(FORM_BASE + Q_ENTRY + encodeURIComponent(combinedQuestions))}" target="_blank">Open form (prefilled)</a>
-        </div>
-      </div>
-    `;
-
-    cards.appendChild(card);
-  });
-}
-
-/* Called when user clicks Submit Solution on a card */
-function submitSolution(btn, basePrefillUrl){
-  try{
-    const textarea = btn.closest(".suggest-area").querySelector("textarea");
-    const userText = (textarea.value || "").trim();
-    if(!userText){
-      alert("Please type your suggested solution before submitting.");
-      textarea.focus();
-      return;
+    async function loadData() {
+      const res = await fetch(CSV_URL);
+      const text = await res.text();
+      const rows = text.split("\n").map(r => r.split(","));
+      const headers = rows.shift();
+      const data = rows.map(r => Object.fromEntries(r.map((c, i) => [headers[i]?.trim(), c.trim()])));
+      renderCards(data);
     }
-    const finalUrl = basePrefillUrl + encodeURIComponent(userText);
-    window.open(finalUrl, "_blank", "noopener");
-  }catch(e){
-    console.error("submitSolution error", e);
-    alert("Could not submit. Please try again.");
-  }
-}
 
-/* Filters */
-function applyFilters(){
-  const q = document.getElementById("search").value.trim().toLowerCase();
-  const p = document.getElementById("priorityFilter").value;
-  filtered = allRows.filter(row => {
-    const hay = [
-      row["Question 1"], row["Question 2"], row["Question 3"],
-      row["Possible Solution"], row["Tag(e.g., SIM swap, phishing, PIN safety)."]
-    ].join(" ").toLowerCase();
-    const matchText = !q || hay.includes(q);
-    const matchPrio = !p || row["Priority(H/M/L)"] === p;
-    return matchText && matchPrio;
-  });
-  render();
-}
+    function renderCards(data) {
+      const container = document.getElementById("cards");
+      container.innerHTML = "";
+      data.forEach((row) => {
+        if (!row["Question 1"] && !row["Question 2"] && !row["Question 3"]) return;
 
-document.getElementById("search").addEventListener("input", applyFilters);
-document.getElementById("priorityFilter").addEventListener("change", applyFilters);
+        // collect non-empty questions
+        const questions = [row["Question 1"], row["Question 2"], row["Question 3"]].filter(Boolean);
 
-/* Init: fetch CSV, parse, render */
-(async function init(){
-  try{
-    const res = await fetch(CSV_URL);
-    if(!res.ok) throw new Error("Failed to fetch CSV: " + res.status);
-    const text = await res.text();
-    const rows = parseCSV(text);
-    allRows = rows.filter(r => (r["Question 1"] && r["Question 1"].trim()) || (r["Question 2"] && r["Question 2"].trim()) || (r["Question 3"] && r["Question 3"].trim()));
-    filtered = allRows.slice();
-    render();
-    console.info("Loaded rows:", allRows.length);
-  }catch(err){
-    console.error("Load error:", err);
-    document.getElementById("empty").textContent = "Could not load sheet data. Check the CSV link and that sheet is published.";
-    document.getElementById("empty").style.display = "block";
-  }finally{
-    document.getElementById("loading").style.display = "none";
-  }
-})();
-</script>
+        const card = document.createElement("div");
+        card.className = "card";
 
+        // priority + tag
+        const badges = document.createElement("div");
+        badges.className = "badges";
+        if (row["Priority(H/M/L)"]) {
+          let pr = row["Priority(H/M/L)"].toLowerCase();
+          badges.innerHTML += `<span class="badge ${pr}">${row["Priority(H/M/L)"]}</span>`;
+        }
+        if (row["Tag(e.g., SIM swap, phishing, PIN safety)."]) {
+          badges.innerHTML += `<span class="badge tag">${row["Tag(e.g., SIM swap, phishing, PIN safety)."]}</span>`;
+        }
+        card.appendChild(badges);
+
+        // show all non-empty questions
+        questions.forEach(q => {
+          const p = document.createElement("p");
+          p.textContent = q;
+          card.appendChild(p);
+        });
+
+        // existing possible solution
+        if (row["Possible Solution"]) {
+          const sol = document.createElement("div");
+          sol.className = "solution";
+          sol.textContent = "Solution: " + row["Possible Solution"];
+          card.appendChild(sol);
+        }
+
+        // suggestion input + button
+        const textarea = document.createElement("textarea");
+        textarea.placeholder = "Suggest a solution...";
+        textarea.rows = 3;
+        card.appendChild(textarea);
+
+        const btn = document.createElement("button");
+        btn.textContent = "Submit Solution";
+        btn.onclick = () => {
+          const qText = questions.join(" | ");
+          const sText = textarea.value;
+          const url = FORM_BASE + Q_ENTRY + encodeURIComponent(qText) + "&" + SOL_ENTRY + encodeURIComponent(sText);
+          window.open(url, "_blank", "noopener");
+        };
+        card.appendChild(btn);
+
+        container.appendChild(card);
+      });
+    }
+
+    loadData();
+  </script>
 </body>
 </html>
