@@ -1,24 +1,46 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Cybersecurity Awareness Questions</title>
   <style>
-    body { font-family: Arial, sans-serif; background:#f4f4f9; margin:20px; }
-    .card { background:#fff; border-radius:12px; padding:16px; margin:16px auto;
-            max-width:600px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-    .badges { margin-bottom:8px; }
-    .badge { display:inline-block; padding:4px 8px; border-radius:8px;
-             font-size:12px; margin-right:6px; color:#fff; }
-    .high { background:#e74c3c; }
-    .medium { background:#f39c12; }
-    .low { background:#27ae60; }
-    .tag { background:#2980b9; }
-    .solution { margin:8px 0; padding:8px; background:#ecf0f1; border-radius:6px; }
-    textarea { width:100%; min-height:60px; margin-top:6px; padding:8px; }
-    button { margin-top:6px; padding:8px 12px; border:none; border-radius:6px;
-             background:#3498db; color:#fff; cursor:pointer; }
-    button:hover { background:#2980b9; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 15px auto;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      max-width: 600px;
+    }
+    .question {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .solution {
+      margin-bottom: 8px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-right: 5px;
+      color: white;
+    }
+    .high { background: #e74c3c; }   /* Red */
+    .medium { background: #f39c12; } /* Orange */
+    .low { background: #27ae60; }    /* Green */
+    .tag { background: #3498db; }    /* Blue */
   </style>
 </head>
 <body>
@@ -26,81 +48,42 @@
   <div id="cards"></div>
 
   <script>
-    // === CONFIG ===
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vToqPBwRgOnC8tq-xQ18vrCTtAL5v0TG2z7HoXdGiXTtLoilWkpfoq3DFWr93oPSXlsW2f_kmJ2Vse4/pub?output=csv";
-    const FORM_BASE = "https://docs.google.com/forms/d/e/1FAIpQLSc4S6LV8NWwomzoGudHhDoAdwbQUblw3jOjVmvk4l6275Voeg/viewform?usp=pp_url&";
-    const Q_ENTRY   = "entry.1171875158=";  // Question entry id
-    const SOL_ENTRY = "entry.1293335924=";  // Solution entry id
+    const apiKey = "AIzaSyDQPmzCD5z68jpaBprX9D_LWjKEFzAIwjc";
+    const sheetId = "1Qdoq2PNheBxEpjotm5YDWEm-kcjR_hskFyg5UZPpqxw";
+    const sheetName = "response";
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
 
-    async function loadData() {
-      const res = await fetch(CSV_URL);
-      const text = await res.text();
-      const rows = text.split("\n").map(r => r.split(","));
-      const headers = rows.shift();
-      const data = rows.map(r => Object.fromEntries(r.map((c, i) => [headers[i]?.trim(), c.trim()])));
-      renderCards(data);
-    }
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const rows = data.values;
+        const container = document.getElementById("cards");
 
-    function renderCards(data) {
-      const container = document.getElementById("cards");
-      container.innerHTML = "";
-      data.forEach((row) => {
-        if (!row["Question 1"] && !row["Question 2"] && !row["Question 3"]) return;
+        if (rows && rows.length > 1) {
+          rows.slice(1).forEach(row => {
+            const [timestamp, question, solution, priority, tag] = row;
 
-        // collect non-empty questions
-        const questions = [row["Question 1"], row["Question 2"], row["Question 3"]].filter(Boolean);
+            const card = document.createElement("div");
+            card.className = "card";
 
-        const card = document.createElement("div");
-        card.className = "card";
+            card.innerHTML = `
+              <div class="question">${question || "No Question"}</div>
+              <div class="solution"><strong>Solution:</strong> ${solution || "No solution yet"}</div>
+              <div>
+                ${priority ? `<span class="badge ${priority.toLowerCase()}">${priority}</span>` : ""}
+                ${tag ? `<span class="badge tag">${tag}</span>` : ""}
+              </div>
+            `;
 
-        // priority + tag
-        const badges = document.createElement("div");
-        badges.className = "badges";
-        if (row["Priority(H/M/L)"]) {
-          let pr = row["Priority(H/M/L)"].toLowerCase();
-          badges.innerHTML += `<span class="badge ${pr}">${row["Priority(H/M/L)"]}</span>`;
+            container.appendChild(card);
+          });
+        } else {
+          container.innerHTML = "<p>No responses yet.</p>";
         }
-        if (row["Tag(e.g., SIM swap, phishing, PIN safety)."]) {
-          badges.innerHTML += `<span class="badge tag">${row["Tag(e.g., SIM swap, phishing, PIN safety)."]}</span>`;
-        }
-        card.appendChild(badges);
-
-        // show all non-empty questions
-        questions.forEach(q => {
-          const p = document.createElement("p");
-          p.textContent = q;
-          card.appendChild(p);
-        });
-
-        // existing possible solution
-        if (row["Possible Solution"]) {
-          const sol = document.createElement("div");
-          sol.className = "solution";
-          sol.textContent = "Solution: " + row["Possible Solution"];
-          card.appendChild(sol);
-        }
-
-        // suggestion input + button
-        const textarea = document.createElement("textarea");
-        textarea.placeholder = "Suggest a solution...";
-        textarea.rows = 3;
-        card.appendChild(textarea);
-
-        const btn = document.createElement("button");
-        btn.textContent = "Submit Solution";
-        btn.onclick = () => {
-          const qText = questions.join(" | ");
-          const sText = textarea.value;
-          const url = FORM_BASE + Q_ENTRY + encodeURIComponent(qText) + "&" + SOL_ENTRY + encodeURIComponent(sText);
-          window.open(url, "_blank", "noopener");
-        };
-        card.appendChild(btn);
-
-        container.appendChild(card);
+      })
+      .catch(error => {
+        document.getElementById("cards").textContent = "Error: " + error;
       });
-    }
-
-    loadData();
   </script>
 </body>
 </html>
