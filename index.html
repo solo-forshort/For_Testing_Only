@@ -13,21 +13,36 @@
       text-align: center;
       color: #333;
     }
+    #cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
     .card {
       background: white;
       border-radius: 10px;
       padding: 15px;
-      margin: 15px auto;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      max-width: 600px;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
     }
     .question {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: bold;
       margin-bottom: 10px;
     }
     .solution {
       margin-bottom: 8px;
+      font-size: 14px;
+      flex-grow: 1;
     }
     .badge {
       display: inline-block;
@@ -36,6 +51,10 @@
       font-size: 12px;
       margin-right: 5px;
       color: white;
+      cursor: pointer;
+    }
+    .badge:hover {
+      opacity: 0.8;
     }
     .high { background: #e74c3c; }   /* Red */
     .medium { background: #f39c12; } /* Orange */
@@ -67,19 +86,33 @@
     .suggest-btn:hover {
       background-color: #2980b9;
     }
+    #filter-info {
+      text-align: center;
+      margin: 10px 0;
+      font-size: 14px;
+      color: #555;
+    }
+    #clear-filter {
+      cursor: pointer;
+      color: #3498db;
+      text-decoration: underline;
+      margin-left: 5px;
+    }
   </style>
 </head>
 <body>
   <h2>Cybersecurity Awareness Questions</h2>
 
-  <!-- Ask A Question Button -->
+  <!-- Ask A Question Button + Search -->
   <div id="search-container">
-    <a href="https://docs.google.com/forms/d/e/1FAIpQLScTZWQleOrA9JvGm6GZ_8CzrfzHQzgb7zwjnXejKTAtn5qnhw/viewform?usp=sharing&ouid=117936331264839609159" target="_blank" class="suggest-btn">
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLScTZWQleOrA9JvGm6GZ_8CzrfzHQzgb7zwjnXejKTAtn5qnhw/viewform?usp=sharing&ouid=117936331264839609159" 
+       target="_blank" class="suggest-btn">
       📝 Ask A Question
     </a>
     <input type="text" id="page-search" placeholder="Search questions...">
   </div>
 
+  <div id="filter-info"></div>
   <div id="cards"></div>
 
   <script>
@@ -87,6 +120,9 @@
     const sheetId = "1Qdoq2PNheBxEpjotm5YDWEm-kcjR_hskFyg5UZPpqxw";
     const sheetName = "response";
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+
+    let allCards = [];
+    let activeFilter = "";
 
     fetch(url)
       .then(response => response.json())
@@ -105,12 +141,22 @@
               <div class="question">${question || "No Question"}</div>
               <div class="solution"><strong>Solution:</strong> ${solution || "No solution yet"}</div>
               <div>
-                ${priority ? `<span class="badge ${priority.toLowerCase()}">${priority}</span>` : ""}
-                ${tag ? `<span class="badge tag">${tag}</span>` : ""}
+                ${priority ? `<span class="badge ${priority.toLowerCase()}" data-filter="${priority}">${priority}</span>` : ""}
+                ${tag ? `<span class="badge tag" data-filter="${tag}">${tag}</span>` : ""}
               </div>
             `;
 
             container.appendChild(card);
+          });
+
+          allCards = document.querySelectorAll('.card');
+
+          // Badge filtering
+          document.querySelectorAll('.badge').forEach(badge => {
+            badge.addEventListener('click', () => {
+              activeFilter = badge.getAttribute('data-filter').toLowerCase();
+              filterCards();
+            });
           });
         } else {
           container.innerHTML = "<p>No responses yet.</p>";
@@ -122,18 +168,37 @@
 
     // Search functionality
     document.getElementById('page-search').addEventListener('input', function() {
-      const query = this.value.toLowerCase();
-      const cards = document.querySelectorAll('.card');
+      filterCards();
+    });
 
-      cards.forEach(card => {
+    // Filter logic
+    function filterCards() {
+      const query = document.getElementById('page-search').value.toLowerCase();
+      const info = document.getElementById("filter-info");
+
+      allCards.forEach(card => {
         const text = card.innerText.toLowerCase();
-        if (text.includes(query)) {
+        if (
+          text.includes(query) &&
+          (!activeFilter || text.includes(activeFilter))
+        ) {
           card.style.display = '';
         } else {
           card.style.display = 'none';
         }
       });
-    });
+
+      if (activeFilter) {
+        info.innerHTML = `🔍 Filtering by: <strong>${activeFilter}</strong> <span id="clear-filter">(clear)</span>`;
+        document.getElementById("clear-filter").addEventListener("click", () => {
+          activeFilter = "";
+          info.innerHTML = "";
+          filterCards();
+        });
+      } else {
+        info.innerHTML = "";
+      }
+    }
   </script>
 </body>
 </html>
