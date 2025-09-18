@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cybersecurity Awareness Questions</title>
   <style>
-    /* Box sizing for consistent sizing */
     * { box-sizing: border-box; }
 
     :root {
@@ -47,7 +46,6 @@
       margin-bottom:18px;
     }
 
-    /* pill-shaped controls */
     .pill {
       padding:10px 16px;
       border-radius:999px;
@@ -66,7 +64,6 @@
       color: inherit;
     }
 
-    /* search + filter pill style */
     #page-search, #priority-filter {
       padding:10px 14px;
       border-radius:999px;
@@ -76,7 +73,6 @@
       font-size:14px;
     }
 
-    /* Cards grid - desktop: multiple cards per row */
     #cards {
       display: grid;
       gap: 16px;
@@ -113,14 +109,14 @@
       color: var(--text-dark);
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
-    body.light #page-search, body.light #priority-filter { background: #fff; color: var(--text-dark); }
+    body.light #page-search, 
+    body.light #priority-filter { background: #fff; color: var(--text-dark); }
     body.light .pill { background: var(--gold); color: #000; border-color: var(--gold); }
+    body.light .solution { color: #000; } /* ✅ FIX applied */
 
-    /* Force single-column layout on phones / small tablets */
     @media (max-width: 1024px) {
       #cards { grid-template-columns: 1fr !important; }
       .card { width: 100%; max-width: 100%; }
-      /* Make search and filter full-width-ish on small screens */
       .top-controls { padding: 0 12px; }
       #page-search { flex: 1 1 100%; max-width: 100%; }
       #priority-filter { flex: 0 0 auto; margin-left: 8px; }
@@ -148,17 +144,14 @@
   <div id="cards" aria-live="polite"></div>
 
   <script>
-    // CONFIG - replace with your form & sheet if different
     const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScTZWQleOrA9JvGm6GZ_8CzrfzHQzgb7zwjnXejKTAtn5qnhw/viewform?usp=sharing";
-    const apiKey = "AIzaSyDQPmzCD5z68jpaBprX9D_LWjKEFzAIwjc"; // keep restricted to your domain
+    const apiKey = "AIzaSyDQPmzCD5z68jpaBprX9D_LWjKEFzAIwjc";
     const sheetId = "1Qdoq2PNheBxEpjotm5YDWEm-kcjR_hskFyg5UZPpqxw";
     const sheetName = "response";
     const SHEETS_URL = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}?key=${apiKey}`;
 
-    // hookup ask button
     document.getElementById('ask-btn').href = FORM_URL;
 
-    // toggle mode button
     const toggleBtn = document.getElementById('toggle-mode');
     function updateToggleLabel() {
       toggleBtn.textContent = document.body.classList.contains('light') ? "🌙 Dark Mode" : "☀️ Light Mode";
@@ -170,7 +163,6 @@
     });
     updateToggleLabel();
 
-    // fetch and render
     async function loadData(){
       try {
         const res = await fetch(SHEETS_URL);
@@ -192,7 +184,6 @@
         return;
       }
 
-      // map header positions (robust)
       const headers = rows[0].map(h => String(h||'').trim());
       const idx = name => headers.indexOf(name);
 
@@ -211,7 +202,6 @@
         card.className = 'card';
         card.setAttribute('data-priority', (String(priority).toLowerCase()||''));
 
-        // build inner HTML (hide empty fields)
         let inner = `<div class="question">${escapeHtml(question)}</div>`;
         if(solution && String(solution).trim()) inner += `<div class="solution"><strong>Solution:</strong> ${escapeHtml(solution)}</div>`;
         inner += `<div class="badges">`;
@@ -222,14 +212,10 @@
         card.innerHTML = inner;
         container.appendChild(card);
       });
-
-      // after render, attach filter listeners operate on DOM (already wired below)
     }
 
-    // helpers
     function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    // filters
     const searchEl = document.getElementById('page-search');
     const priorityEl = document.getElementById('priority-filter');
 
@@ -247,7 +233,6 @@
     searchEl.addEventListener('input', applyFilters);
     priorityEl.addEventListener('change', applyFilters);
 
-    // load
     loadData();
   </script>
 </body>
