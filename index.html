@@ -86,8 +86,7 @@
       padding: 20px;
       box-shadow: 0 2px 8px rgba(255,204,0,0.3);
       width: 300px;
-      min-height: 200px;
-      max-height: 240px;
+      height: 220px; /* uniform height */
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -111,6 +110,8 @@
     .solution {
       font-size: 14px;
       flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .badges {
