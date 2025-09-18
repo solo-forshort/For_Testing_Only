@@ -6,47 +6,49 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f9;
       padding: 20px;
-      color: #333;
       transition: background 0.3s ease, color 0.3s ease;
     }
     h2 {
       text-align: center;
-      color: inherit;
     }
+
     /* Top Controls */
     .top-controls {
       text-align: center;
       margin-bottom: 20px;
     }
     .suggest-btn {
-      background: #3498db;
-      color: white;
+      background: #ffcc00;
+      color: #000;
       padding: 10px 18px;
       border-radius: 8px;
       text-decoration: none;
       font-size: 14px;
       margin-right: 10px;
-      transition: background 0.3s ease;
+      transition: background 0.3s ease, color 0.3s ease;
     }
     .suggest-btn:hover {
-      background: #2980b9;
+      background: #e6b800;
     }
     #page-search {
       padding: 8px 12px;
       width: 50%;
       max-width: 300px;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid #ffcc00;
       font-size: 14px;
+      background: inherit;
+      color: inherit;
     }
     #priority-filter {
       padding: 8px 12px;
       border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid #ffcc00;
       font-size: 14px;
       margin-left: 10px;
+      background: inherit;
+      color: inherit;
     }
     .toggle-btn {
       margin-left: 10px;
@@ -54,13 +56,13 @@
       border-radius: 6px;
       border: none;
       cursor: pointer;
-      background: #2c3e50;
-      color: white;
+      background: #ffcc00;
+      color: #000;
       font-size: 13px;
-      transition: background 0.3s ease;
+      transition: background 0.3s ease, color 0.3s ease;
     }
     .toggle-btn:hover {
-      background: #1a242f;
+      background: #e6b800;
     }
 
     /* Cards Grid */
@@ -70,18 +72,17 @@
       gap: 15px;
     }
     .card {
-      background: white;
       border-radius: 10px;
       padding: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
       transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease, color 0.3s ease;
+      border: 1px solid #ffcc00;
     }
     .card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 10px rgba(255,204,0,0.5);
     }
     .question {
       font-size: 15px;
@@ -107,25 +108,22 @@
 
     /* Dark Mode */
     body.dark {
-      background: #1e1e1e;
-      color: #f4f4f9;
+      background: #000;
+      color: #ffcc00;
     }
     body.dark .card {
-      background: #2c2c2c;
-      color: #f4f4f9;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+      background: #111;
+      color: #ffcc00;
     }
-    body.dark #page-search,
-    body.dark #priority-filter {
-      background: #333;
-      color: #f4f4f9;
-      border: 1px solid #555;
+
+    /* Light Mode */
+    body.light {
+      background: #fff;
+      color: #000;
     }
-    body.dark .suggest-btn {
-      background: #2980b9;
-    }
-    body.dark .toggle-btn {
-      background: #444;
+    body.light .card {
+      background: #fff;
+      color: #000;
     }
 
     /* Force one card per row on small screens */
@@ -136,7 +134,7 @@
     }
   </style>
 </head>
-<body>
+<body class="dark">
   <h2>Cybersecurity Awareness Questions</h2>
 
   <!-- Top controls -->
@@ -151,7 +149,7 @@
       <option value="medium">Medium</option>
       <option value="low">Low</option>
     </select>
-    <button id="toggle-mode" class="toggle-btn">🌙 Dark Mode</button>
+    <button id="toggle-mode" class="toggle-btn">☀️ Light Mode</button>
   </div>
 
   <!-- Cards container -->
@@ -218,8 +216,11 @@
     // Dark Mode toggle
     const toggleBtn = document.getElementById('toggle-mode');
     toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('light');
       document.body.classList.toggle('dark');
-      toggleBtn.textContent = document.body.classList.contains('dark') ? "☀️ Light Mode" : "🌙 Dark Mode";
+      toggleBtn.textContent = document.body.classList.contains('dark')
+        ? "☀️ Light Mode"
+        : "🌙 Dark Mode";
     });
   </script>
 </body>
