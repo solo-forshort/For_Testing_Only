@@ -68,10 +68,21 @@
     }
     /* Cards Grid */
     #cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 15px;
-    }
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 15px;
+}
+
+/* On small screens, make cards full width */
+@media (max-width: 600px) {
+  #cards {
+    grid-template-columns: 1fr; /* one card per row */
+  }
+  .card {
+    width: 100%; /* stretch card to full screen width */
+  }
+}
+
     .card {
       background: #111;
       border-radius: 10px;
